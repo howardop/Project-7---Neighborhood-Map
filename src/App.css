@@ -31,10 +31,13 @@
  * 
  */
 /* Make the width of the direct parent of the nav menu = 100% according to your application structure -- ? */
+/* Next 2 sytles from Google Maps sample on google.com */
+#map {
+  height: 100vh;
+}
 
 html, body, main{
 	height: 100%;
-  width: 100%;
   margin: 0;
   padding: 0;
 }
