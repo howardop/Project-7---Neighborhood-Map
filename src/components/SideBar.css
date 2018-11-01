@@ -7,3 +7,16 @@ button {
     background: white;
     padding: 10;
 } 
+
+ul {
+    
+    padding: 0; 
+    margin: 0;
+}
+
+li {
+   
+  /*  padding: 0; 
+    margin: 0;*/
+    margin-top: 15px;
+}

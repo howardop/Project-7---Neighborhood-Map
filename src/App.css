@@ -1,18 +1,21 @@
 .App-header {
   background-color: #282c34;
   color: white;
-  height: 100px;
+  height: 14vh; /* Header height + map height = 100vh*/
   display: flex;
   flex-direction: inline;
   align-items: center;
   justify-content: center;
-  
 }
 
 .App-title {
   font-size: 2em;
 }
 
+/* Google says to always set the map height explicitly to define the size of the div element that contains the map. */
+
+/* Map height + App-header height = 100vh to fill screen */
 #map {
-  height: 100vh;
+  height: 86vh;
 }
+
