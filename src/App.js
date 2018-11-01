@@ -11,6 +11,8 @@ const defaultCenter = {
 
 const defaultZoom = 17;
 
+
+
 class App extends Component {
   state = {
     locations: [],
@@ -20,7 +22,6 @@ class App extends Component {
     markers: [],
     open: false     // Indicates if sidebar is visible    
   }
-
 
   componentDidMount() {
     this.getLocations();
@@ -67,24 +68,6 @@ class App extends Component {
       google: window.google
     });
   }
-
-  styles = {
-    menuButton: {
-      marginLeft: 10,
-      marginRight: 20,
-      position: "absolute",
-      left: 10,
-      top: 20,
-      background: "white",
-      padding: 10
-    },
-    hide: {
-      display: 'none'
-    },
-    header: {
-      marginTop: "0px"
-    }
-  };
 
   getLocations = () => {
     // Look for theaters on Broadway
@@ -151,42 +134,52 @@ class App extends Component {
   }
 
   toggleSideBar = () => {
-    this.setState({
-      open: !this.state.open
-    })
-  };
+    console.log('toggleSideBar called');
+    this.setState({open: !this.state.open});
+  }
 
+  closeSideBar = () => {
+    console.log('closeSideBar called');
+    this.setState({open: false});
+  }
+  
+  styles = {
+    menuButton: {
+      marginLeft: 10,
+      marginRight: 20,
+      position: "absolute",
+      left: 10,
+      top: 20,
+      background: "white",
+      padding: 10
+    },
+    hide: {
+      display: 'none'
+    },
+    header: {
+      marginTop: "0px"
+    }
+  };
+  
   render() {
     return (
       <main>
-        <div className = "App" >
-        <div>
-          <button  style={this.styles.menuButton}>
+        
+        <div className = "App-header">
+          <button onClick={this.toggleSideBar} style={this.styles.menuButton}>
+            Display Menu
             <i className="fa fa-bars"></i>
           </button>
-          <h1><center>Katy, TX Mexican Restaurants</center></h1>
+          <h1 className='App-title'><center>Broadway Theater Map</center></h1>
         </div>
-          <div className = "App-header" >
-              <button id='Menu-button'  >
-                Display Menu
-              </button>
-              
-             <h1 className = "App-title" > <center>     Broadway Theater Map </center> </h1> 
-               
-          
-
-           </div> 
            
-           <SideBar locations={this.state.locations}
-            open={this.state.open} 
-            toggleSideBar={this.state.toggleSideBar}/>
+          <SideBar locations={this.state.locations}
+          open={this.state.open} 
+          toggleSideBar={this.toggleSideBar}
+          close={this.closeSideBar}/>
 
           <div id = 'map' > </div>  
-
-         
-          
-          
-        </div> 
+       
       </main>
     );
   };
