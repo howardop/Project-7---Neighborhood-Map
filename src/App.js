@@ -204,13 +204,17 @@ class App extends Component {
 
   updateQuery = (query) => {
     console.log(`query is: ${query}`);
-    
+    let markers = this.state.markers;
+    let map = this.state.map;
     let filteredLocations = this.state.locations.filter((loc, index, array) => {
-        return loc.name.toLowerCase().includes(query.toLowerCase());
+      let toInclude = loc.name.toLowerCase().includes(query.toLowerCase());
+        markers[index].setVisible(toInclude);
+      
+      return toInclude;
     })
 
     console.log('filteredLocations = ', filteredLocations);
-    this.setState({ query, filteredLocations});
+    this.setState({filteredLocations, map, markers});
     
   }
 

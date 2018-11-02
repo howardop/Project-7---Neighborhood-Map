@@ -51,7 +51,7 @@ class SideBar extends Component {
     };
 
     render() {
-        console.log('SideBar being processed');
+        //console.log('SideBar being processed');
         return(
             <div>
                 <Drawer  open={this.props.open} onClose={this.props.toggleSideBar}>  
