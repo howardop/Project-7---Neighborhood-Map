@@ -10,17 +10,16 @@ class SideBar extends Component {
     state = {
         open: false,
         query: '',
-        filteredLocations: []
     }
 
     // Called each time a character is added to or deleted from the seach field.
     updateQuery = (query) => {
         console.log(`query is: ${query}`);
-        
-        let filteredLocations = this.props.locations.filter((loc, index, array) => {return loc.name.toLowerCase().includes(this.state.query.toLowerCase());})
-        console.log('filteredLocations = ', filteredLocations);
-        this.setState({ query, filteredLocations});
-        
+        // Update the input box
+        this.setState({query});
+
+        // Pass control to App.js to process the SideBar and the markers
+        this.props.updateQuery(query);
     }
 
     styles = {
@@ -52,6 +51,7 @@ class SideBar extends Component {
     };
 
     render() {
+        console.log('SideBar being processed');
         return(
             <div>
                 <Drawer  open={this.props.open} onClose={this.props.toggleSideBar}>  
@@ -64,7 +64,7 @@ class SideBar extends Component {
                                 this.updateQuery(event.target.value);
                             }}
                             style = {this.styles.filterEntry}
-                        />                
+                        />            
                         <ul >
                             {this.props.locations &&
                             this.props.locations.map((location, index) => {

@@ -32,18 +32,18 @@ class App extends Component {
   state = {
     locations: [],
     filteredLocations: [],
-    selectedMarkerIndex: -1,
     center: defaultCenter,
     zoom: defaultZoom,
     markers: [],
-    open: false     // Indicates if sidebar is visible    
+    open: false,     // Indicates if sidebar is visible   
+    query: '' 
   }
 
   componentDidMount() {
     this.getLocations();
   }
 
-  initMap = () => {
+  initMap = (theaters) => {
     /*let map = new window.google.maps.Map(document.getElementById('map'), {
       center:  defaultCenter,
       zoom: defaultZoom
@@ -55,7 +55,7 @@ class App extends Component {
  
     // this is pointing to window here
     // Add marker for each theater found
-    let markers = this.state.locations.map(theater => {
+    let markers = theaters.map(theater => {
       //console.log(theater.location.formattedAddress);
       let contentString = `<strong>${theater.name}</strong><br /> ${theater.location.address}`;
       let marker = new window.google.maps.Marker({
@@ -81,11 +81,12 @@ class App extends Component {
 
     });
 
-    console.log('About to put markers into state');
+    console.log('About to put theaters and markers into state');
     this.setState({
       map: map,
-      markers: markers,
-      google: window.google
+      locations: theaters,
+      filteredLocations: theaters,
+      markers: markers
     });
     
 
@@ -108,10 +109,9 @@ class App extends Component {
       .then ((data) => {
         // this points to App here
         //console.log(`In fetch.then(data), "this" is `, this);
-        this.setState({locations: data.response.venues});
-        //console.log(`There are ${this.state.locations.length} items returned`);
+
         // Foursquare returns more than just theaters
-        let theaters = this.state.locations.filter(function (value, index, array) {
+        let theaters = data.response.venues.filter(function (value, index, array) {
           return (value.name.includes('Theater') || value.name.includes('Theatre'));
         });
         /*
@@ -123,9 +123,9 @@ class App extends Component {
         */
 
         // Update state with real theaters and create map
-        this.setState({locations: theaters}, function() {
+        this.setState({locations: theaters, filteredLocations: theaters}, function() {
           // Cannot not just pass initMap(), must pass a function that calls initMap()
-          this.initMap();
+          this.initMap(theaters);
         });
         /*
         console.log(`the theaters in state.locations are `);
@@ -161,6 +161,15 @@ class App extends Component {
   closeSideBar = () => {
     this.setState({open: false});
   }
+
+  filterMarkers = (filterArray) => {
+    console.log('filterMarkers called');
+    let markers = this.state.markers;
+    for (let i=0; i<filterArray.length; i++) {
+      markers[i].setVisible(filterArray[i]);
+    }
+    this.setState({markers});
+  }
   
   styles = {
     menuButton: {
@@ -192,6 +201,19 @@ class App extends Component {
     }
     window.google.maps.event.trigger(this.state.map, 'click', mev);
   }
+
+  updateQuery = (query) => {
+    console.log(`query is: ${query}`);
+    
+    let filteredLocations = this.state.locations.filter((loc, index, array) => {
+        return loc.name.toLowerCase().includes(query.toLowerCase());
+    })
+
+    console.log('filteredLocations = ', filteredLocations);
+    this.setState({ query, filteredLocations});
+    
+  }
+
   
   render() {
     return (
@@ -204,10 +226,12 @@ class App extends Component {
           <h1 className='App-title'><center>Broadway Theater Map</center></h1>
         </div>
            
-          <SideBar id='sidebar' locations={this.state.locations}
+          <SideBar id='sidebar' locations={this.state.filteredLocations}
           open={this.state.open} 
           toggleSideBar={this.toggleSideBar}
-          clickListItem={this.clickListItem}/>
+          clickListItem={this.clickListItem}
+          updateQuery={this.updateQuery}
+           />
 
           <div id = 'map' role='application' aria-label='map'> </div>  
        
