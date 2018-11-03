@@ -36,7 +36,8 @@ class App extends Component {
     zoom: defaultZoom,
     markers: [],
     open: false,     // Indicates if sidebar is visible   
-    query: '' 
+    query: '',
+    bouncingMarker: null 
   }
 
   componentDidMount() {
@@ -52,9 +53,11 @@ class App extends Component {
 
     // Now set up InfoWindow to be shared by each marker
     let infoWindow = new window.google.maps.InfoWindow();
- 
+    
     // this is pointing to window here
     // Add marker for each theater found
+    let index = 0;
+    
     let markers = theaters.map(theater => {
       //console.log(theater.location.formattedAddress);
       let contentString = `<strong>${theater.name}</strong><br /> ${theater.location.address}`;
@@ -65,21 +68,37 @@ class App extends Component {
         },
         map: map,
         animation: window.google.maps.Animation.DROP,
-        title: theater.name
+        title: theater.name,
+        index: index++
       });
 
       // Set up Listener for each marker to display InfoWindow when user clicks on marker
-      marker.addListener('click', function () {
+      marker.addListener('click', () => {
         // Set content for specific marker
         console.log('marker.addListener called');
+        markers = this.state.markers;
+        let bouncingMarker = this.state.bouncingMarker;
+        if (bouncingMarker !== null && marker.index !== bouncingMarker) {
+          markers[bouncingMarker].setAnimation(null);
+        }
         infoWindow.setContent(contentString);
+        marker.setAnimation(window.google.maps.Animation.BOUNCE);
         infoWindow.open(map, marker);
+        this.setState({
+          bouncingMarker: marker.index
+        });
       });
 
       // Include return statement to avoid eslint message
       return marker;
 
     });
+
+    // Compare real marker index to computed index
+    for (let i=0; i<markers.length; i++) {
+      console.log(`markers[${i}] has index = ${markers[i].index}`);
+    }
+
 
     console.log('About to put theaters and markers into state');
     this.setState({
@@ -90,6 +109,14 @@ class App extends Component {
     });
     
 
+  }
+
+  toggleBounce = (marker) => {
+    if (marker.getAnimation() !== null) {
+      marker.setAnimation(null);
+    } else {
+      marker.setAnimation(window.google.maps.Animation.BOUNCE);
+    }
   }
 
   getLocations = () => {
@@ -135,23 +162,6 @@ class App extends Component {
         */
       });
  
-      /*
-      filterlocs(str) {
-        let f = str ? 
-          this.locations.filter(v => {
-            v.name.toLowerCase().includes(str.toLowerCase())}) : this.locations;
-        // Now filter out markers
-        // for loop supposedly much faster than Array.forEach()
-        for (let i=0; i<markers.length; i++) {
-          if (markers[i].name.toLowerCase().includes(str.toLowerCase()) {
-            markers[i].setvisible(true);
-          } else {
-            markers[i].setvisible(false);
-          }
-        });
-        this.setState({filtered: v});
-      }
-      */
   }
 
   toggleSideBar = () => {
@@ -160,15 +170,6 @@ class App extends Component {
 
   closeSideBar = () => {
     this.setState({open: false});
-  }
-
-  filterMarkers = (filterArray) => {
-    console.log('filterMarkers called');
-    let markers = this.state.markers;
-    for (let i=0; i<filterArray.length; i++) {
-      markers[i].setVisible(filterArray[i]);
-    }
-    this.setState({markers});
   }
   
   styles = {
@@ -189,7 +190,6 @@ class App extends Component {
 
   clickListItem = (index) => {
     // Set the state to reflect the selected location array index
-    //this.setState({ selectedIndex: index, open: !this.state.open })
     console.log(`${this.state.locations[index].name} clicked`);
     console.log(`Need to click marker ${this.state.markers[index].title}`);
     window.google.maps.event.trigger(this.state.markers[index], 'click');
@@ -214,6 +214,10 @@ class App extends Component {
     })
 
     console.log('filteredLocations = ', filteredLocations);
+    // Center map to first item in list
+    let newLat = filteredLocations[0].location.lat;
+    let newLng = filteredLocations[0].location.lng;
+    map.setCenter({lat:newLat, lng:newLng })
     this.setState({filteredLocations, map, markers});
     
   }

@@ -6,10 +6,12 @@
   flex-direction: inline;
   align-items: center;
   justify-content: center;
+  
 }
 
 .App-title {
-  font-size: 2em;
+  /*font-size: 2em;*/
+  max-width: 70%;
 }
 
 /* Google says to always set the map height explicitly to define the size of the div element that contains the map. */

@@ -24,7 +24,7 @@ class SideBar extends Component {
 
     styles = {
         list: {
-            width: "250px",
+            width: "200px",
             padding: "0px 15px 0px"
         },
         noBullets: {
@@ -45,8 +45,8 @@ class SideBar extends Component {
         filterEntry: {
             border: "1px solid gray",
             padding: "3px",
-            margin: "30px 0px 10px",
-            width: "100%"
+            margin: "30px 0px 10px"
+            /*width: "100%"*/
         }
     };
 
@@ -54,7 +54,7 @@ class SideBar extends Component {
         //console.log('SideBar being processed');
         return(
             <div>
-                <Drawer  open={this.props.open} onClose={this.props.toggleSideBar}>  
+                <Drawer  open={this.props.open} onClose={this.props.toggleSideBar} width={'30%'}>  
                     <div style={this.styles.list}>
                         <input
                             type = "text"
