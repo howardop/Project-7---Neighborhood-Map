@@ -53,6 +53,21 @@ class App extends Component {
 
     // Now set up InfoWindow to be shared by each marker
     let infoWindow = new window.google.maps.InfoWindow();
+
+    
+    window.google.maps.event.addListener(infoWindow,'closeclick',() => {
+      console.log(`closeclick handler entered`);
+      let bouncingMarker = this.state.bouncingMarker;
+      let markers = this.state.markers;
+      markers[bouncingMarker].setAnimation(null);
+      this.setState({markers: markers, bouncingMarker: null});
+   });
+   /*
+    infoWindow.addListener('closeclick', () => {
+      console.log(`closeclick handler entered`);
+
+    });
+    */
     
     // this is pointing to window here
     // Add marker for each theater found
