@@ -28,6 +28,8 @@ var myOptions = {
   styles: myStyles
 };
 
+
+
 class App extends Component {
   state = {
     locations: [],
@@ -43,6 +45,9 @@ class App extends Component {
     infoWindowOpen: false
   }
 
+  callConsoleLog = () => {
+    console.log('callConsoleLog called');
+  }
   componentDidMount() {
     this.getLocations();
   }
@@ -161,8 +166,7 @@ class App extends Component {
       markers: markers,
       infoWindow: infoWindow
     });
-  };
-
+   };
 
   toggleSideBar = () => {
     // Close any bouncing marker
@@ -237,7 +241,7 @@ class App extends Component {
       <main>
         
         <div className="App-header">
-          <button id='sidebarButton' onClick={this.toggleSideBar} >
+          <button id='sidebarButton' tabIndex='0' onClick={this.toggleSideBar} >
             <i className="fa fa-bars"  ></i>
           </button>
           <h1 className='App-title'><center>Broadway Theater Map</center></h1>
@@ -258,3 +262,4 @@ class App extends Component {
 }
 
 export default App;
+

@@ -13,6 +13,20 @@ This application will also supports offline use once the map appears in the brow
 5. The home page will open in a tab with the title `Neighborhood Map` with the url http://localhost:3000  
 6. Thereafter, you can start Neighborhood Map by simply typing `npm start`.  
 
+### Building Neighborhood Map for production
+__Note:__ The default service worker is used in Neighborhood Map.  Because Neighborhood App is bootstrapped using Create React App, the service worker will only work in a production build.  
+
+To create the production build, follow these instructions from the Create React App README: 
+
+Execute `npm run build` or `yarn build`.
+This builds the app for production to the build folder.
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.
+
+Your app is ready to be deployed.
+
+
 ## Using Neigborhood Map
 When the web page opens, markers appear for each Broadway theater in New York City.
 1.  The `theater name` will appear by hovering the mouse over a marker.

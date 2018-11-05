@@ -32,3 +32,8 @@
   padding: 10px;
 }
 
+button:focus {
+  font-weight: bold;
+  background: red;
+}
+
