@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import './App.css';
 import './components/SideBar.css';
 import SideBar from './components/SideBar';
+import Map from './components/Map';
+import fetch from 'react-native-fetch-polyfill';
 
 const defaultCenter = {
   // Broadway and W45th St
@@ -11,21 +13,19 @@ const defaultCenter = {
 const defaultZoom = 17;
 
 // Hide points of interest that otherwise clutter up the map
-var myStyles =[
-  {
-      featureType: "poi",
-      elementType: "labels",
-      stylers: [
-            { visibility: "off" }
-      ]
-  }
-];
+var myStyles = [{
+  featureType: "poi",
+  elementType: "labels",
+  stylers: [{
+    visibility: "off"
+  }]
+}];
 
 var myOptions = {
   zoom: defaultZoom,
   center: defaultCenter,
   mapTypeId: window.google.maps.MapTypeId.ROADMAP,
-  styles: myStyles 
+  styles: myStyles
 };
 
 class App extends Component {
@@ -35,124 +35,30 @@ class App extends Component {
     center: defaultCenter,
     zoom: defaultZoom,
     markers: [],
-    open: false,     // Indicates if sidebar is visible   
-    query: '',
-    bouncingMarker: null 
+    open: false,          // Indicates if sidebar is visible   
+    query: '',            // Value used to filter items in SideBar
+    bouncingMarker: null, // Index of bouncing marker
+    error: null           // Holds error object if data cannot be retrieved
   }
 
   componentDidMount() {
     this.getLocations();
   }
 
-  initMap = (theaters) => {
-    /*let map = new window.google.maps.Map(document.getElementById('map'), {
-      center:  defaultCenter,
-      zoom: defaultZoom
-    });*/
-    let map = new window.google.maps.Map(document.getElementById('map'), myOptions);
-
-    // Now set up InfoWindow to be shared by each marker
-    let infoWindow = new window.google.maps.InfoWindow();
-
-    
-    window.google.maps.event.addListener(infoWindow,'closeclick',() => {
-      console.log(`closeclick handler entered`);
-      let bouncingMarker = this.state.bouncingMarker;
-      let markers = this.state.markers;
-      markers[bouncingMarker].setAnimation(null);
-      this.setState({markers: markers, bouncingMarker: null});
-   });
-   /*
-    infoWindow.addListener('closeclick', () => {
-      console.log(`closeclick handler entered`);
-
-    });
-    */
-    
-    // this is pointing to window here
-    // Add marker for each theater found
-    let index = 0;
-    
-    let markers = theaters.map(theater => {
-      //console.log(theater.location.formattedAddress);
-      let contentString = `<strong>${theater.name}</strong><br /> ${theater.location.address}`;
-      let marker = new window.google.maps.Marker({
-        position: {
-          lat: theater.location.lat,
-          lng: theater.location.lng
-        },
-        map: map,
-        animation: window.google.maps.Animation.DROP,
-        title: theater.name,
-        index: index++
-      });
-
-      // Set up Listener for each marker to display InfoWindow when user clicks on marker
-      marker.addListener('click', () => {
-        // Set content for specific marker
-        console.log('marker.addListener called');
-        markers = this.state.markers;
-        let bouncingMarker = this.state.bouncingMarker;
-        if (bouncingMarker !== null && marker.index !== bouncingMarker) {
-          markers[bouncingMarker].setAnimation(null);
-        }
-        infoWindow.setContent(contentString);
-        marker.setAnimation(window.google.maps.Animation.BOUNCE);
-        infoWindow.open(map, marker);
-        this.setState({
-          bouncingMarker: marker.index
-        });
-      });
-
-      // Include return statement to avoid eslint message
-      return marker;
-
-    });
-
-    // Compare real marker index to computed index
-    for (let i=0; i<markers.length; i++) {
-      console.log(`markers[${i}] has index = ${markers[i].index}`);
-    }
-
-
-    console.log('About to put theaters and markers into state');
-    this.setState({
-      map: map,
-      locations: theaters,
-      filteredLocations: theaters,
-      markers: markers
-    });
-    
-
-  }
-
-  toggleBounce = (marker) => {
-    if (marker.getAnimation() !== null) {
-      marker.setAnimation(null);
-    } else {
-      marker.setAnimation(window.google.maps.Animation.BOUNCE);
-    }
-  }
-
   getLocations = () => {
     // Look for theaters on Broadway
-    const theaterCategoryId = '4bf58dd8d48988d137941735'; 
-    
+    const theaterCategoryId = '4bf58dd8d48988d137941735';
+
     const url = `https://api.foursquare.com/v2/venues/search?ll=40.7579984,%20-73.9856257&radius=250&intent=browse&client_id=DQ4DTQOWUBJMWTFUFL4YXGDHMV0K4TE13IHYDFJPER15UTJB&client_secret=A3ZVRPXB2ENUSG5EG5BZM0UYVR1JW33TUXQKX2TGSJRB2B4W&v=20181001&categoryId=${theaterCategoryId}`;
-    
+
     // this points to App here
     //console.log(`On entry to getLocations, "this" is `, this);
-    fetch(url)
-      .then( (response) => {
-        //console.log(`In fetch.then(response), "this" is `, this);
-        //console.log('Data returned');
+    fetch(url, {timeout: 1 * 1000})
+      .then((response) => {
         return response.json();
       })
-      .then ((data) => {
-        // this points to App here
-        //console.log(`In fetch.then(data), "this" is `, this);
-
-        // Foursquare returns more than just theaters
+      .then((data) => {
+        // Foursquare returns more than just theaters.  Filter out non-theaters
         let theaters = data.response.venues.filter(function (value, index, array) {
           return (value.name.includes('Theater') || value.name.includes('Theatre'));
         });
@@ -165,50 +71,113 @@ class App extends Component {
         */
 
         // Update state with real theaters and create map
-        this.setState({locations: theaters, filteredLocations: theaters}, function() {
+        this.setState({
+          locations: theaters,
+          filteredLocations: theaters
+        }, function () {
           // Cannot not just pass initMap(), must pass a function that calls initMap()
           this.initMap(theaters);
         });
-        /*
-        console.log(`the theaters in state.locations are `);
-        for (let i=0; i<theaters.length; i++) {
-          console.log(`${i+1}. `, this.state.locations[i].name);
-        }  
-        */
-      });
- 
+      })
+      .catch((error) => {
+        this.setState({
+          error
+        });
+      })
   }
 
+  initMap = (theaters) => {
+    let map = new window.google.maps.Map(document.getElementById('map'), myOptions);
+
+    // Now set up InfoWindow to be shared by each marker
+    let infoWindow = new window.google.maps.InfoWindow();
+
+    // Stop bouncing marker is infoWidow is closed
+    window.google.maps.event.addListener(infoWindow, 'closeclick', () => {
+      console.log(`closeclick handler entered`);
+      let bouncingMarker = this.state.bouncingMarker;
+      let markers = this.state.markers;
+      if (bouncingMarker !== null) {
+        markers[bouncingMarker].setAnimation(null);
+      }
+      this.setState({
+        markers: markers,
+        bouncingMarker: null
+      });
+    });
+
+    // Add marker for each theater found
+    let markers = theaters.map((theater, index) => {
+      //console.log(`theater ${theater.name} has index ${index}`);
+      let contentString = `<strong>${theater.name}</strong><br> ${theater.location.address}<br><small>&#40;Theater data provided by Foursquare.&#41;</small>`;
+      let marker = new window.google.maps.Marker({
+        position: {
+          lat: theater.location.lat,
+          lng: theater.location.lng
+        },
+        map: map,
+        animation: window.google.maps.Animation.DROP,
+        title: theater.name,
+        globalIndex: index
+      });
+      theater.marker = marker; // Link marker to its theater
+      theater.globalIndex = index; // Global index is index in unfiltered array.  It is used as an invariant with the markers array
+
+      // Set up Listener for each marker to display InfoWindow when user clicks on marker
+      marker.addListener('click', () => {
+        console.log('marker.addListener called');
+        markers = this.state.markers;
+
+        // Stop any currently bouncing marker
+        let bouncingMarker = this.state.bouncingMarker;
+        let newBouncer = null;
+        if (bouncingMarker !== null) { 
+          markers[bouncingMarker].setAnimation(null);
+        } 
+        if (marker.globalIndex !== bouncingMarker) {
+          // Set content for specific marker
+          infoWindow.setContent(contentString);
+          marker.setAnimation(window.google.maps.Animation.BOUNCE);
+          infoWindow.open(map, marker);
+          newBouncer = marker.globalIndex;
+        }
+        // Remember which marker is bouncing
+        this.setState({
+          bouncingMarker: newBouncer});
+      });
+
+      // Include return statement to avoid eslint message
+      return marker;
+
+    });
+
+    this.setState({
+      map: map,
+      locations: theaters,
+      filteredLocations: theaters,
+      markers: markers
+    });
+  };
+
+
   toggleSideBar = () => {
-    this.setState({open: !this.state.open});
+    this.setState({
+      open: !this.state.open
+    });
   }
 
   closeSideBar = () => {
-    this.setState({open: false});
+    this.setState({
+      open: false
+    });
   }
-  
-  styles = {
-    menuButton: {
-      marginLeft: 10,
-      marginRight: 20,
-      position: "absolute",
-      left: 10,
-      top: 20,
-      background: "black",
-      color: 'white',
-      padding: 10
-    },
-    hamburger: {
-      fontSize: '2em'
-    }
-  };
 
   clickListItem = (index) => {
-    // Set the state to reflect the selected location array index
-    console.log(`${this.state.locations[index].name} clicked`);
-    console.log(`Need to click marker ${this.state.markers[index].title}`);
+    //console.log(`${this.state.locations[index].name} clicked`);
+    //console.log(`Need to click marker ${this.state.markers[index].title}`);
     window.google.maps.event.trigger(this.state.markers[index], 'click');
-    // Need to close SideBar
+
+    // Close SideBar after a theater is chosen.  Do this by progammatically clicking map
     this.closeSideBar();
     let mev = {
       stop: null,
@@ -223,40 +192,44 @@ class App extends Component {
     let map = this.state.map;
     let filteredLocations = this.state.locations.filter((loc, index, array) => {
       let toInclude = loc.name.toLowerCase().includes(query.toLowerCase());
-        markers[index].setVisible(toInclude);
-      
+      markers[index].setVisible(toInclude);
+
       return toInclude;
     })
-
     console.log('filteredLocations = ', filteredLocations);
     // Center map to first item in list
     let newLat = filteredLocations[0].location.lat;
     let newLng = filteredLocations[0].location.lng;
-    map.setCenter({lat:newLat, lng:newLng })
-    this.setState({filteredLocations, map, markers});
-    
-  }
+    map.setCenter({
+      lat: newLat,
+      lng: newLng
+    })
+    this.setState({
+      filteredLocations,
+      map,
+      markers
+    });
 
-  
+  }
   render() {
     return (
       <main>
         
         <div className="App-header">
-          <button onClick={this.toggleSideBar} style={this.styles.menuButton}>
-            <i className="fa fa-bars" style={this.styles.hamburger} ></i>
+          <button id='sidebarButton' onClick={this.toggleSideBar} >
+            <i className="fa fa-bars"  ></i>
           </button>
           <h1 className='App-title'><center>Broadway Theater Map</center></h1>
         </div>
-           
-          <SideBar id='sidebar' locations={this.state.filteredLocations}
+          
+        <SideBar id='sidebar' filteredLocations={this.state.filteredLocations}
           open={this.state.open} 
           toggleSideBar={this.toggleSideBar}
           clickListItem={this.clickListItem}
           updateQuery={this.updateQuery}
-           />
-
-          <div id = 'map' role='application' aria-label='map'> </div>  
+        />
+        <Map error={this.state.error} />
+      
        
       </main>
     );

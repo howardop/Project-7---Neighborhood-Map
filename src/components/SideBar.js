@@ -66,11 +66,12 @@ class SideBar extends Component {
                             style = {this.styles.filterEntry}
                         />            
                         <ul >
-                            {this.props.locations &&
-                            this.props.locations.map((location, index) => {
+                            {this.props.filteredLocations &&
+                            this.props.filteredLocations.map((filteredLocation, index) => {
+                                
                                 return (
                                     <li key={index}>
-                                        <button style={this.styles.listLink} key={index} onClick={e => this.props.clickListItem(index)}>{location.name}</button>
+                                        <button style={this.styles.listLink} key={index} onClick={e => this.props.clickListItem(filteredLocation.globalIndex)}>{filteredLocation.name}</button>
                                     </li>
                                 )
                             })}
