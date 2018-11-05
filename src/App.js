@@ -38,7 +38,9 @@ class App extends Component {
     open: false,          // Indicates if sidebar is visible   
     query: '',            // Value used to filter items in SideBar
     bouncingMarker: null, // Index of bouncing marker
-    error: null           // Holds error object if data cannot be retrieved
+    error: null,           // Holds error object if data cannot be retrieved
+    infoWindow: null,
+    infoWindowOpen: false
   }
 
   componentDidMount() {
@@ -102,7 +104,8 @@ class App extends Component {
       }
       this.setState({
         markers: markers,
-        bouncingMarker: null
+        bouncingMarker: null,
+        infoWindowOpen: false
       });
     });
 
@@ -143,7 +146,7 @@ class App extends Component {
         }
         // Remember which marker is bouncing
         this.setState({
-          bouncingMarker: newBouncer});
+          bouncingMarker: newBouncer, infoWindowOpen: true});
       });
 
       // Include return statement to avoid eslint message
@@ -155,15 +158,33 @@ class App extends Component {
       map: map,
       locations: theaters,
       filteredLocations: theaters,
-      markers: markers
+      markers: markers,
+      infoWindow: infoWindow
     });
   };
 
 
   toggleSideBar = () => {
+    // Close any bouncing marker
+    let bouncingMarker = this.state.bouncingMarker;
+    let markers = this.state.markers;
+    let infoWindowOpen = this.state.infoWindowOpen;
+    if (bouncingMarker !== null) {
+      markers[bouncingMarker].setAnimation(null);
+      bouncingMarker = null;
+      if (infoWindowOpen){
+        this.state.infoWindow.close();
+      }
+      
     this.setState({
-      open: !this.state.open
+      open: !this.state.open, infoWindowOpen: false, bouncingMarker: bouncingMarker,
+      markers: markers
     });
+    } else {
+      this.setState({
+        open: !this.state.open
+      });
+    }
   }
 
   closeSideBar = () => {
