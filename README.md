@@ -5,12 +5,13 @@ The Neighborhood Map project is a single page application displaying the Broadwa
 
 This application will also supports offline use once the map appears in the browser. 
 
-## Installing and Starting MyReads
+## Installing and Starting Neighborhood Map
 1. Clone https://github.com/howardop/Project-7---Neighborhood-Map.git
 2. Cd to Project-7---Neighborhood-Map/
 3. Execute `npm install`
 4. Execute `npm start`
-5. The home page will open in a tab with the title `Neighborhood Map`.  
+5. The home page will open in a tab with the title `Neighborhood Map` with the url http://localhost:3000  
+6. Thereafter, you can start Neighborhood Map by simply typing `npm start`.  
 
 ## Using Neigborhood Map
 When the web page opens, markers appear for each Broadway theater in New York City.
