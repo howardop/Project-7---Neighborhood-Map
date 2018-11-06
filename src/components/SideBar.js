@@ -14,7 +14,6 @@ class SideBar extends Component {
 
     // Called each time a character is added to or deleted from the seach field.
     updateQuery = (query) => {
-        console.log(`query is: ${query}`);
         // Update the input box
         this.setState({query});
 
@@ -26,16 +25,6 @@ class SideBar extends Component {
         list: {
             width: "200px",
             padding: "0px 15px 0px"
-        },
-        noBullets: {
-            listStyleType: "none"
-            ,padding: 0
-        },
-        fullList: {
-            width: 'auto'
-        },
-        listItem: {
-            marginBottom: "15px"
         },
         listLink: {
             background: "transparent",
@@ -51,7 +40,6 @@ class SideBar extends Component {
     };
 
     render() {
-        //console.log('SideBar being processed');
         return(
             <div>
                 <Drawer  open={this.props.open} onClose={this.props.toggleSideBar} width={'30%'}>  

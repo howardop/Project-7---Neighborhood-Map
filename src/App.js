@@ -45,9 +45,6 @@ class App extends Component {
     infoWindowOpen: false
   }
 
-  callConsoleLog = () => {
-    console.log('callConsoleLog called');
-  }
   componentDidMount() {
     this.getLocations();
   }
@@ -58,8 +55,6 @@ class App extends Component {
 
     const url = `https://api.foursquare.com/v2/venues/search?ll=40.7579984,%20-73.9856257&radius=250&intent=browse&client_id=DQ4DTQOWUBJMWTFUFL4YXGDHMV0K4TE13IHYDFJPER15UTJB&client_secret=A3ZVRPXB2ENUSG5EG5BZM0UYVR1JW33TUXQKX2TGSJRB2B4W&v=20181001&categoryId=${theaterCategoryId}`;
 
-    // this points to App here
-    //console.log(`On entry to getLocations, "this" is `, this);
     fetch(url, {timeout: 1 * 1000})
       .then((response) => {
         return response.json();
@@ -69,13 +64,6 @@ class App extends Component {
         let theaters = data.response.venues.filter(function (value, index, array) {
           return (value.name.includes('Theater') || value.name.includes('Theatre'));
         });
-        /*
-        console.log(`There are ${theaters.length} real theaters`);
-        console.log(`the theaters are `);
-        for (let i=0; i<theaters.length; i++) {
-          console.log(theaters[i].name);
-        }
-        */
 
         // Update state with real theaters and create map
         this.setState({
@@ -101,7 +89,6 @@ class App extends Component {
 
     // Stop bouncing marker is infoWidow is closed
     window.google.maps.event.addListener(infoWindow, 'closeclick', () => {
-      console.log(`closeclick handler entered`);
       let bouncingMarker = this.state.bouncingMarker;
       let markers = this.state.markers;
       if (bouncingMarker !== null) {
@@ -116,7 +103,6 @@ class App extends Component {
 
     // Add marker for each theater found
     let markers = theaters.map((theater, index) => {
-      //console.log(`theater ${theater.name} has index ${index}`);
       let contentString = `<strong>${theater.name}</strong><br> ${theater.location.address}<br><small>&#40;Theater data provided by Foursquare.&#41;</small>`;
       let marker = new window.google.maps.Marker({
         position: {
@@ -133,7 +119,6 @@ class App extends Component {
 
       // Set up Listener for each marker to display InfoWindow when user clicks on marker
       marker.addListener('click', () => {
-        console.log('marker.addListener called');
         markers = this.state.markers;
 
         // Stop any currently bouncing marker
@@ -198,8 +183,6 @@ class App extends Component {
   }
 
   clickListItem = (index) => {
-    //console.log(`${this.state.locations[index].name} clicked`);
-    //console.log(`Need to click marker ${this.state.markers[index].title}`);
     window.google.maps.event.trigger(this.state.markers[index], 'click');
 
     // Close SideBar after a theater is chosen.  Do this by progammatically clicking map
@@ -212,7 +195,6 @@ class App extends Component {
   }
 
   updateQuery = (query) => {
-    console.log(`query is: ${query}`);
     let markers = this.state.markers;
     let map = this.state.map;
     let filteredLocations = this.state.locations.filter((loc, index, array) => {
@@ -221,7 +203,6 @@ class App extends Component {
 
       return toInclude;
     })
-    console.log('filteredLocations = ', filteredLocations);
     // Center map to first item in list
     let newLat = filteredLocations[0].location.lat;
     let newLng = filteredLocations[0].location.lng;
